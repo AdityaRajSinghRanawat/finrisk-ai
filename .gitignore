@@ -1,0 +1,30 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual env
+.venv/
+venv/
+env/
+
+# Notebook checkpoints
+.ipynb_checkpoints/
+
+# Data artifacts
+*.csv
+*.parquet
+*.xlsx
+
+# Model artifacts
+models/*.pkl
+!models/.gitkeep
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+
+# Streamlit local secrets
+.streamlit/secrets.toml
