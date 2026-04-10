@@ -37,22 +37,39 @@ Financial institutions need a fast and interpretable way to estimate whether a l
 	- `Loan_Term`
 	- `Employment_Status`
 
-## Run (Simple 2 Commands)
+## Quick Start
 
 From project root:
+
+```bash
+python -m pip install -r requirements.txt
+python src/train.py --data data/raw/loan_prediction_dataset.csv --target Loan_Approved
+python -m streamlit run streamlit_app.py
+```
+
+Open: `http://localhost:8501`
+
+Note: training is required once to generate `models/loan_model.pkl`.
+
+## Common Errors and Fixes
+
+1. Error: `streamlit is not recognized`
 
 ```bash
 python -m pip install -r requirements.txt
 python -m streamlit run streamlit_app.py
 ```
 
-Open: `http://localhost:8501`
-
-## Train Model (One-Time, If Model Missing)
+2. Error: `Model file not found`
 
 ```bash
 python src/train.py --data data/raw/loan_prediction_dataset.csv --target Loan_Approved
+python -m streamlit run streamlit_app.py
 ```
+
+3. App opened on different port
+
+If `8501` is busy, Streamlit may use `8502` (check terminal URL).
 
 ## Project Structure
 
