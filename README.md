@@ -1,21 +1,28 @@
 # finrisk-ai
 
-Portfolio-grade loan approval risk prediction project for data science recruiter review.
+End-to-end machine learning project for loan risk estimation, including training, inference, and a Streamlit interface.
 
-## Problem Statement
+## Overview
 
-Financial institutions need a fast and interpretable way to estimate whether a loan application is likely to default. This project builds an end-to-end ML workflow that predicts risk and presents outputs in a simple Streamlit app.
+This project trains a classifier on loan application data and converts model output into business-facing risk indicators:
 
-## What This Project Demonstrates
+- Default probability (derived from model approval probability)
+- Risk level (`Low`, `Medium`, `High`)
+- Financial health score (0-100)
+- Practical risk suggestions
 
-- Structured EDA with data quality checks, class balance analysis, and feature exploration
-- Reproducible preprocessing and model training pipeline
-- Model benchmarking across Logistic Regression, Random Forest, and Decision Tree
-- Practical inference outputs for decision support:
-	- default probability
-	- risk level (Low/Medium/High)
-	- financial health score
-	- actionable suggestions
+It is designed as a portfolio-ready DS workflow with modular code in `src/`, EDA in `notebooks/`, and a runnable UI in `streamlit_app.py`.
+
+## Features
+
+- Data loading and schema validation
+- Reusable preprocessing pipeline:
+	- Numeric median imputation + scaling
+	- Categorical mode imputation + one-hot encoding
+- Multi-model benchmarking (`LogisticRegression`, `RandomForestClassifier`, `DecisionTreeClassifier`)
+- Automatic best-model selection by test F1 score
+- Model serialization to `models/loan_model.pkl`
+- Streamlit app for interactive single-applicant scoring
 
 ## Tech Stack
 
@@ -25,11 +32,11 @@ Financial institutions need a fast and interpretable way to estimate whether a l
 - Matplotlib, Seaborn
 - Streamlit
 
-## Dataset and Target
+## Dataset and Schema
 
-- Dataset: `data/raw/loan_prediction_dataset.csv`
-- Target column: `Loan_Approved`
-- Features used:
+- Input file: `data/raw/loan_prediction_dataset.csv`
+- Default target column: `Loan_Approved`
+- Required feature columns:
 	- `Age`
 	- `Income`
 	- `Credit_Score`
@@ -37,59 +44,85 @@ Financial institutions need a fast and interpretable way to estimate whether a l
 	- `Loan_Term`
 	- `Employment_Status`
 
-## Quick Start
+## Setup
 
-From project root:
+From the project root:
 
 ```bash
 python -m pip install -r requirements.txt
+```
+
+## Train a Model
+
+```bash
+python src/train.py --data data/raw/loan_prediction_dataset.csv --target Loan_Approved
+```
+
+This command evaluates candidate models and saves the best pipeline to:
+
+- `models/loan_model.pkl`
+
+Optional arguments:
+
+- `--output` to change model output path
+
+## Run Inference (CLI)
+
+```bash
+python src/predict.py --model models/loan_model.pkl
+```
+
+`src/predict.py` includes an example payload in `main()` and prints a result dictionary.
+
+## Launch the Streamlit App
+
+```bash
+python -m streamlit run streamlit_app.py
+```
+
+Then open the URL shown in terminal (typically `http://localhost:8501`).
+
+## Common Issues
+
+1. `streamlit is not recognized`
+
+```bash
+python -m pip install -r requirements.txt
+python -m streamlit run streamlit_app.py
+```
+
+2. `Model file not found`
+
+```bash
 python src/train.py --data data/raw/loan_prediction_dataset.csv --target Loan_Approved
 python -m streamlit run streamlit_app.py
 ```
 
-Open: `http://localhost:8501`
+3. Port 8501 already in use
 
-Note: training is required once to generate `models/loan_model.pkl`.
-
-## Common Errors and Fixes
-
-1. Error: `streamlit is not recognized`
-
-```bash
-python -m pip install -r requirements.txt
-python -m streamlit run streamlit_app.py
-```
-
-2. Error: `Model file not found`
-
-```bash
-python src/train.py --data data/raw/loan_prediction_dataset.csv --target Loan_Approved
-python -m streamlit run streamlit_app.py
-```
-
-3. App opened on different port
-
-If `8501` is busy, Streamlit may use `8502` (check terminal URL).
+Streamlit will automatically use another port (for example, 8502). Use the URL printed in terminal.
 
 ## Project Structure
 
-- `streamlit_app.py`: Streamlit UI
-- `src/preprocess.py`: preprocessing and feature pipeline
-- `src/train.py`: training and model selection
-- `src/predict.py`: inference logic
-- `src/utils.py`: scoring and helper utilities
-- `notebooks/eda.ipynb`: EDA and benchmarking notebook
-- `requirements.txt`: dependencies
+- `streamlit_app.py`: Streamlit interface
+- `src/preprocess.py`: data loading, validation, and preprocessing pipeline
+- `src/train.py`: training, evaluation, best-model selection, persistence
+- `src/predict.py`: model loading and single-record risk inference
+- `src/utils.py`: risk categorization, scoring, and suggestion helpers
+- `notebooks/eda.ipynb`: exploratory data analysis and model exploration
+- `requirements.txt`: dependency list
 
-## Recruiter Notes
+## Notes
 
-- This project emphasizes end-to-end DS execution, not only model accuracy.
-- The notebook includes a caveat on possible synthetic/rule-driven data behavior and over-optimistic metrics.
-- Code is modular, readable, and ready for extension into production APIs.
+- Risk labeling uses thresholds from `src/utils.py`:
+	- `Low`: default probability < 0.25
+	- `Medium`: 0.25 to < 0.55
+	- `High`: >= 0.55
+- Financial score is computed as `100 * (1 - default_probability)`, clipped to [0, 100].
 
-## Next Improvements
+## Possible Next Steps
 
-- Add model explainability (SHAP)
-- Add calibration and threshold tuning
-- Add automated tests and CI pipeline
-- Deploy Streamlit app to Streamlit Community Cloud
+- Add explainability (SHAP or feature importance views in app)
+- Add probability calibration and threshold tuning
+- Add test suite for preprocessing and inference contracts
+- Add CI checks and deployment workflow
